@@ -5,34 +5,9 @@ CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 uptime_status="#($CURRENT_DIR/scripts/uptime.sh)"
 uptime_status_interpolation="\#{uptime}"
 
-__get_tmux_option() {
-  local option="$1"
-  local default_value="$2"
-  local option_value="$(tmux show-option -gqv "$option")"
-  if [ -z "$option_value" ]; then
-    echo "$default_value"
-  else
-    echo "$option_value"
-  fi
-}
-
-set_tmux_option() {
-  local option="$1"
-  local value="$2"
-  tmux set-option -gq "$option" "$value"
-}
-
-do_interpolation() {
-  local string=$1
-  local uptime_status_interpolated=${string/$uptime_status_interpolation/$uptime_status}
-  echo $uptime_status_interpolated
-}
-
 update_tmux_option() {
-  local option="$1"
-  local option_value="$(__get_tmux_option "$option")"
-  local new_option_value="$(do_interpolation "$option_value")"
-  set_tmux_option "$option" "$new_option_value"
+  local option_value="$(tmux show-option -gqv "$1")"
+  tmux set-option -gq "$1" "${option_value/$uptime_status_interpolation/$uptime_status}"
 }
 
 main() {
